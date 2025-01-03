@@ -1,49 +1,62 @@
 #!/usr/bin/env python3
+
+import os
 import sys
 import time
-import json
 import requests
 
+# Constants for Virustotal API limits
+DEFAULT_SLEEP = 15
+PREMIUM_SLEEP = 0
 
-# Argveta - Discovering subdomains recursively using Virustotal API
-# Virustotal Public API is limited to 500 requests per day and a rate of 4 requests per minute.
-# The Premium API does not have request rate or daily allowance limitations
-# If you have a premium account change vt_premium = False as vt_premium = True
+def get_api_key() -> str:
+    api_key = os.getenv("VT_API_KEY")
+    if not api_key:
+        sys.exit("Error: Virustotal API key not set. Set it using the 'VT_API_KEY' environment variable.")
+    return api_key
 
+def get_sleep_interval() -> int:
+    premium = bool(os.getenv("VT_PREMIUM", "False").lower() == "true")
+    return PREMIUM_SLEEP if premium else DEFAULT_SLEEP
 
-# API key
-api_key = ''
-premium = False
-sleep = 20 if not premium else 0
-
-
-if api_key == '':
-    sys.exit(print('Please add Virusttotal API key'))
-
-if len(sys.argv) == 1:
-    sys.exit(print('Usage: python3 argveta.py example.com'))
-
-
-def url(domain: str) -> str:
+def build_url(domain: str) -> str:
     return f'https://www.virustotal.com/api/v3/domains/{domain}/relationships/subdomains'
-    
 
-def get_domains(api_url: str) -> None:
-
+def fetch_subdomains(api_url: str, api_key: str, sleep: int) -> None:
+    # Recursively fetch subdomains from the Virustotal API.
     try:
-        response = requests.get(api_url, headers = {'x-apikey': api_key}, params = {'limit': 40})
-        json_data = response.json()
-        
-        for domain in json_data['data']:
-            print(domain['id'])
-            get_domains(url(domain['id']))
-            time.sleep(sleep)
-        
-        if 'next' in json_data['links']:
-            get_domains(json_data['links']['next'])   
+        response = requests.get(api_url, headers={"x-apikey": api_key}, params={"limit": 40})
+        response.raise_for_status()
+        data = response.json()
 
+        for domain in data.get("data", []):
+            subdomain = domain.get("id")
+            if subdomain:
+                print(subdomain)
+                fetch_subdomains(build_url(subdomain), api_key, sleep)
+                time.sleep(sleep)
+
+        next_url = data.get("links", {}).get("next")
+        if next_url:
+            fetch_subdomains(next_url, api_key, sleep)
+
+    except requests.exceptions.RequestException as e:
+        print(f"HTTP Error: {e}")
+    except KeyError as e:
+        print(f"Unexpected response format: Missing key {e}")
     except Exception as e:
-      print(f'Error: {e}')
+        print(f"An unexpected error occurred: {e}")
 
+def main():
+    if len(sys.argv) != 2:
+        sys.exit("Usage: python3 argveta.py <domain>")
 
-get_domains(url(sys.argv[1]))
+    domain = sys.argv[1]
+    api_key = get_api_key()
+    sleep = get_sleep_interval()
+
+    print(f"Starting subdomain discovery for: {domain}")
+    fetch_subdomains(build_url(domain), api_key, sleep)
+
+if __name__ == "__main__":
+    main()

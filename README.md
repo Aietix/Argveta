@@ -1,18 +1,70 @@
-# Argveta
-**Argveta - Discovering subdomains recursively using  Virustotal API**  
+# Argveta: VirusTotal Subdomain Finder
 
-Add Virustotal API key: **api_key = 'XXXXXXXXXXXX'** \
-If you have a premium account change **vt_premium = False** as **vt_premium = True** 
+This Python script uses the VirusTotal API to recursively fetch subdomains of a given domain. It is designed to help security researchers discover subdomains.
 
-Virustotal Public API is limited to 500 requests per day and a rate of 4 requests per minute. \
-The Premium API does not have request rate or daily allowance limitations 
+## ⚙️ Requirements
 
-**Usage:**  python3 argveta.py google.com
+- Python 3.x
+- `requests` Python library
 
-**Result:**
-1 | 2 | 3  | 4 | 5
------------- | ------------- | ------------- | ------------- | -------------
-google.com | play.google.com | c.play.google.com | redirector.c.play.google.com | ***
+## 🚀 Installation
 
-\
-This script was written in 20 minutes, I hope I will make changes in the future ...
+1. Clone this repository:
+
+    ```bash
+    git clone https://github.com/yourusername/argveta.git
+    cd argveta
+    ```
+
+2. Install the required dependencies:
+
+    ```bash
+    pip install requests
+    ```
+
+## 🔑 Setup
+
+1. Obtain an API key from [VirusTotal](https://www.virustotal.com/).
+2. Set the API key as an environment variable:
+
+    ```bash
+    export VT_API_KEY='your_api_key'
+    ```
+
+3. If you are using a VirusTotal Premium account, set the `VT_PREMIUM` environment variable:
+
+    ```bash
+    export VT_PREMIUM=true
+    ```
+
+## 🛠️ Usage
+
+Run the script with the target domain as a command-line argument:
+
+```bash
+python3 argveta.py <domain>
+```
+
+## 🧪 Example
+
+To discover subdomains for example.com, run:
+
+  ```
+  python3 argveta.py example.com
+  ```
+
+The script will output the discovered subdomains directly in the terminal:
+
+  ```
+  Starting subdomain discovery for: example.com
+  sub1.example.com
+  sub2.example.com
+  sub3.sub2.example.com
+  ...
+  ```
+
+## ⚠️ Notes
+```
+Free users: 4 lookups / min, with a daily limit of 500 requests.
+```
+
