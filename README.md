@@ -4,8 +4,8 @@ This Python script uses the VirusTotal API to recursively fetch subdomains of a 
 
 ## ⚙️ Requirements
 
-- Python 3.x
-- `requests` Python library
+- Python - `3.x`
+- Python library - `requests`
 - VirusTotal API Key
 
 ## 🚀 Installation
