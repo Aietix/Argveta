@@ -4,8 +4,9 @@ This Python script uses the VirusTotal API to recursively fetch subdomains of a 
 
 ## ⚙️ Requirements
 
-- Python 3.x
-- `requests` Python library
+- Python - `3.x`
+- Python library - `requests`
+- VirusTotal API Key
 
 ## 🚀 Installation
 
@@ -28,22 +29,25 @@ This Python script uses the VirusTotal API to recursively fetch subdomains of a 
 2. Set the API key as an environment variable:
 
     ```bash
-    export VT_API_KEY='your_api_key'
+    export VT_API_KEYS='api_key1,api_key2'
     ```
 
-3. If you are using a VirusTotal Premium account, set the `VT_PREMIUM` environment variable:
-
-    ```bash
-    export VT_PREMIUM=true
-    ```
+### **CLI Options**
+| Option        | Description                                   | Default          |
+|--------------|-----------------------------------------------|------------------|
+| `domain`     | The target domain to find subdomains for     | **Required**     |
+| `-o, --output` | Output file to save results                 | `subdomains.json` |
+| `-f, --format` | Output format (`json`, `csv`, `txt`)        | `csv`            |
+| `-s, --sleep`  | Time delay (in seconds) between API requests | `15`             |
 
 ## 🛠️ Usage
 
-Run the script with the target domain as a command-line argument:
+Run the script with the target domain:
 
 ```bash
 python3 argveta.py <domain>
 ```
+
 
 ## 🧪 Example
 
@@ -53,7 +57,7 @@ To discover subdomains for example.com, run:
   python3 argveta.py example.com
   ```
 
-The script will output the discovered subdomains directly in the terminal:
+The script will output the discovered subdomains directly in the terminal and saves them in subdomains.csv (default)
 
   ```
   Starting subdomain discovery for: example.com
@@ -65,6 +69,9 @@ The script will output the discovered subdomains directly in the terminal:
 
 ## ⚠️ Notes
 ```
-Free users: 4 lookups / min, with a daily limit of 500 requests.
+**Free users** have a limited request quota (**4 lookups per minute, 500 per day**).  
+**Premium users** have higher rate limits but still need to avoid excessive requests.
+** VirusTotal suggests avoiding the use of multiple API keys. However, if you do, the script will automatically switch keys when rate limits are reached. 🤷‍♂️
+
 ```
 
