@@ -80,7 +80,6 @@ def fetch_subdomains(api_url: str, api_keys: list) -> None:
     try:
         if api_keys:
             response = requests.get(api_url, headers={"x-apikey": api_keys[0]}, params={"limit": 40}, timeout=10)
-            response.raise_for_status()
 
             if response.status_code == 200:
                 data = response.json()
@@ -107,6 +106,8 @@ def fetch_subdomains(api_url: str, api_keys: list) -> None:
                 api_keys.pop(0)
                 fetch_subdomains(api_url, api_keys)
                 return
+                
+            response.raise_for_status()
         else:
             print("No API keys available to make requests.")
 
