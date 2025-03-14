@@ -10,10 +10,8 @@ import requests
 from requests.exceptions import RequestException, Timeout, HTTPError, ConnectionError
 
 
-# Store discovered subdomains to prevent duplicates
 discovered_subdomains = set()
 
-# Configure logging
 logging.basicConfig(
     level=logging.INFO,
     format='%(asctime)s - %(levelname)s - %(message)s'
@@ -21,7 +19,6 @@ logging.basicConfig(
 logger = logging.getLogger(__name__)
 
 def parse_args():
-    """Parse command-line arguments using argparse."""
     parser = argparse.ArgumentParser(description="VirusTotal Subdomain Enumerator")
 
     parser.add_argument(
@@ -30,12 +27,12 @@ def parse_args():
     )
     parser.add_argument(
         "-o", "--output",
-        help="Output file to save subdomains (default: subdomains.json)",
-        default="subdomains.json"
+        help="Output file to save subdomains (default: subdomains.csv)",
+        default="subdomains.csv"
     )
     parser.add_argument(
         "-f", "--format",
-        help="Output format (json, csv, txt). Default: json",
+        help="Output format (json, csv, txt). Default: csv",
         choices=["json", "csv", "txt"],
         default="csv"
     )
@@ -56,7 +53,6 @@ def build_url(domain: str) -> str:
     return f'https://www.virustotal.com/api/v3/domains/{domain}/relationships/subdomains'
 
 def save_results(filename, output_format):
-    """Save discovered subdomains to a specified file format."""
     if not discovered_subdomains:
         print("No subdomains found to save.")
         return
@@ -75,36 +71,53 @@ def save_results(filename, output_format):
 
     print(f"\n✅ Results saved to {filename}")
 
+def filter_subdomains(data, base_domain):
+    exclude_domains = {base_domain, f"www.{base_domain}"}
+    
+    filtered_domains = [
+        domain["id"] for domain in data.get("data", [])
+        if domain["id"] not in exclude_domains
+    ]
+    
+    return filtered_domains
 
-def fetch_subdomains(api_url: str, api_keys: list) -> None:
+def fetch_subdomains(api_keys: list, domain: str) -> None:
+      
+    api_url = build_url(domain)
+    print(api_url)
+
+    
     try:
         if api_keys:
-            response = requests.get(api_url, headers={"x-apikey": api_keys[0]}, params={"limit": 40}, timeout=10)
+            response = requests.get(api_url, headers={"x-apikey": api_keys[0]}, timeout=10)
 
             if response.status_code == 200:
                 data = response.json()
-                for domain in data.get("data", []):
-                    subdomain = domain.get("id")
+                data = filter_subdomains(data, domain)
+                print(data)
+
+                for subdomain in data:
+                    print(subdomain)
                     if subdomain:
                         discovered_subdomains.add(subdomain)
-                        print(subdomain)
-                        fetch_subdomains(build_url(subdomain), api_keys)
                         time.sleep(15)
+                        fetch_subdomains(api_keys, subdomain)
+                        
 
-                next_url = data.get("links", {}).get("next")
-                if next_url:
-                    fetch_subdomains(next_url, api_keys)
+                # next_url = data.get("links", {}).get("next")
+                # if next_url:
+                #     fetch_subdomains(next_url, api_keys)
 
             if response.status_code == 401:
                 print(f"API key is invalid or expired, Removing and switching to the next key.")
                 api_keys.pop(0)
-                fetch_subdomains(api_url, api_keys)
+                fetch_subdomains(api_keys, domain)
                 return
             
             if response.status_code == 429:
                 print(f"API key is rate-limited, Removing and switching to the next key.")
                 api_keys.pop(0)
-                fetch_subdomains(api_url, api_keys)
+                fetch_subdomains(api_keys, domain)
                 return
                 
             response.raise_for_status()
@@ -132,7 +145,7 @@ def main():
         return
     
     print(f"Starting subdomain discovery for: {args.domain}")
-    fetch_subdomains(build_url(args.domain), get_api_keys())
+    fetch_subdomains(get_api_keys(), args.domain)
     save_results(args.output, args.format)
 
 
