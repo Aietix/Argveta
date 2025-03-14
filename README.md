@@ -57,7 +57,7 @@ To discover subdomains for example.com, run:
   python3 argveta.py example.com
   ```
 
-The script will output the discovered subdomains directly in the terminal:
+The script will output the discovered subdomains directly in the terminal and saves them in subdomains.csv (default)
 
   ```
   Starting subdomain discovery for: example.com
