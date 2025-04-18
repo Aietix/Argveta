@@ -29,7 +29,7 @@ This Python script uses the VirusTotal API to recursively fetch subdomains of a 
 2. Set the API key as an environment variable:
 
     ```bash
-    export VT_API_KEYS='api_key1,api_key2'
+    export VT_API_KEY='api_key1'
     ```
 
 ### **CLI Options**
@@ -71,7 +71,7 @@ The script will output the discovered subdomains directly in the terminal and sa
 ```
 **Free users** have a limited request quota (**4 lookups per minute, 500 per day**).  
 **Premium users** have higher rate limits but still need to avoid excessive requests.
-** VirusTotal suggests avoiding the use of multiple API keys. However, if you do, the script will automatically switch keys when rate limits are reached. 🤷‍♂️
+** VirusTotal suggests avoiding the use of multiple API keys. 🤷‍♂️
 
 ```
 
