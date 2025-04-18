@@ -1,4 +1,4 @@
-# Argveta: VirusTotal Subdomain Finder
+# Argveta — recursively discover subdomains using the VirusTotal API.
 
 This Python script uses the VirusTotal API to recursively fetch subdomains of a given domain. It is designed to help security researchers discover subdomains.
 
